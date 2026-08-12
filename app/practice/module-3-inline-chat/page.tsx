@@ -178,7 +178,8 @@ function PromiseBasedComponent() {
       <button
         onClick={fetchUserData}
         disabled={loading}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+        aria-label="Submit Form"
+        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 disabled:bg-gray-400 disabled:shadow-none disabled:hover:scale-100"
       >
         {loading ? 'Loading...' : 'Fetch User Data'}
       </button>
@@ -272,8 +273,22 @@ function InaccessibleForm() {
  * 🧹 MESSY COMPONENT
  * Refactor this into smaller, clearer functions!
  * ========================================== */
+type Item = {
+  id: number
+  name: string
+  category: string
+  price: number
+  inStock: boolean
+}
+
+type ProcessedItem = Item & {
+  discountedPrice: number
+  formattedPrice: string
+  isOnSale: boolean
+}
+
 function MessyComponent() {
-  const [items, setItems] = useState([
+  const [items, setItems] = useState<Item[]>([
     { id: 1, name: 'Apple', category: 'Fruit', price: 1.5, inStock: true },
     { id: 2, name: 'Banana', category: 'Fruit', price: 0.8, inStock: true },
     { id: 3, name: 'Carrot', category: 'Vegetable', price: 1.2, inStock: false },
@@ -282,27 +297,36 @@ function MessyComponent() {
   const [filter, setFilter] = useState('')
   const [sort, setSort] = useState('name')
 
-  // This is too long and does too many things - break it down!
-  const processedItems = items
-    .filter(item => {
-      if (filter === '') return true
-      return item.category.toLowerCase() === filter.toLowerCase()
-    })
-    .filter(item => item.inStock)
-    .sort((a, b) => {
-      if (sort === 'name') {
-        return a.name.localeCompare(b.name)
-      } else if (sort === 'price') {
-        return a.price - b.price
-      }
-      return 0
-    })
-    .map(item => {
-      const discountedPrice = item.price > 2 ? item.price * 0.9 : item.price
-      const formattedPrice = `$${discountedPrice.toFixed(2)}`
-      const isOnSale = item.price > 2
-      return { ...item, discountedPrice, formattedPrice, isOnSale }
-    })
+  // Returns true when an item matches the selected category filter, or when no filter is set.
+  const filterByCategory = (item: Item, filterValue: string) => {
+    if (filterValue === '') return true
+    return item.category.toLowerCase() === filterValue.toLowerCase()
+  }
+
+  const filterInStock = (item: Item) => item.inStock
+
+  const sortItems = (a: Item, b: Item, sortValue: string) => {
+    if (sortValue === 'name') {
+      return a.name.localeCompare(b.name)
+    } else if (sortValue === 'price') {
+      return a.price - b.price
+    }
+    return 0
+  }
+
+  const enhanceItem = (item: Item): ProcessedItem => {
+    const discountedPrice = item.price > 2 ? item.price * 0.9 : item.price
+    const formattedPrice = `$${discountedPrice.toFixed(2)}`
+    const isOnSale = item.price > 2
+
+    return { ...item, discountedPrice, formattedPrice, isOnSale }
+  }
+
+  const processedItems: ProcessedItem[] = items
+    .filter(item => filterByCategory(item, filter))
+    .filter(filterInStock)
+    .sort((a, b) => sortItems(a, b, sort))
+    .map(enhanceItem)
 
   return (
     <div className="space-y-4">

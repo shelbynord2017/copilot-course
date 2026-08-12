@@ -73,11 +73,11 @@ export default function Module1Practice() {
             <p className="text-gray-600 mb-4">
               Create a simple component below and experiment with Copilot suggestions
             </p>
-            {/* UNCOMMENT AND PRACTICE HERE:
+            UNCOMMENT AND PRACTICE HERE:
             
             <YourPracticeComponent />
-            
-            */}
+          
+           
           </section>
         </div>
       </div>
@@ -221,3 +221,102 @@ function ComplexFilter() {
  * prompting it effectively!
  *
  * ========================================== */
+
+// TODO: Build a PricingCard component 
+
+interface PricingCardProps {
+  title: string
+  price: number
+  description: string
+  highlight?: boolean
+}
+
+const PricingCard = ({ title, price, description, highlight = false }: PricingCardProps) => {
+  return (
+    <div
+      className={`w-full ${highlight ? 'transform scale-100 sm:scale-105 border-2 border-blue-500 shadow-lg' : 'border border-gray-200 shadow-sm'} bg-white rounded-lg p-5 transition-transform`}
+      aria-label={`${title} pricing card`}
+    >
+      {highlight && (
+        <div className="inline-block mb-3 px-2 py-1 text-sm font-semibold text-blue-700 bg-blue-100 rounded-full">
+          Most Popular
+        </div>
+      )}
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">{title}</h3>
+      <p className="text-gray-600 text-sm mb-4">{description}</p>
+      <div className="flex items-baseline gap-2 mb-5">
+        <span className="text-2xl sm:text-4xl font-extrabold text-gray-900">${price}</span>
+        <span className="text-gray-500 text-xs sm:text-sm">/month</span>
+      </div>
+      <button
+        className={`w-full py-2 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+          highlight ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+        }`}
+        aria-label={`Choose ${title} plan`}
+      >
+        Choose Plan
+      </button>
+    </div>
+  )
+}
+
+// 1. Add your new parameter to the interface
+interface ButtonProps {
+  text: string;          // Required string
+  count?: number;        // Optional number
+  isDisabled?: boolean;  // Optional boolean
+  onClick: () => void;   // Function callback
+}
+
+// 2. Destructure and use it in your TSX component
+export const CustomButton = ({ 
+  text, 
+  count = 0,             // Default value if not passed
+  isDisabled = false,    // Default value if not passed
+  onClick 
+}: ButtonProps) => {
+  return (
+    <button disabled={isDisabled} onClick={onClick}>
+      {text} ({count})
+    </button>
+  );
+};
+
+
+interface User {
+  id: number;
+  name: string;
+}
+
+export function UserProfile() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Function using .then()
+  const fetchUserData = async (userId: number) => {
+  setLoading(true)
+
+  try {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`)
+    }
+
+    const data: User = await response.json()
+    setUser(data)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+  } finally {
+    setLoading(false)
+  }
+}
+
+  return (
+    <div>
+      <button onClick={() => fetchUserData(1)}>Load User</button>
+      {loading && <p>Loading...</p>}
+      {user && <div>{user.name}</div>}
+    </div>
+  );
+}
