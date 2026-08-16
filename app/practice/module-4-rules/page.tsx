@@ -9,15 +9,15 @@ import { ChangeEvent, FormEvent, ReactNode, useState } from 'react'
  * Copilot reads `.github/copilot-instructions.md` and follows your preferred coding patterns automatically.
  *
  * This module is RULES-FOCUSED and uses AGENT MODE tasks (bigger, goal-driven prompts).
- * No “suggestions” training here — you’ll direct Copilot to scaffold real components/features that must follow your rules.
+ * No "suggestions" training here — you'll direct Copilot to scaffold real components/features that must follow your rules.
  */
 
-interface LoginFormValues {
+type LoginFormValues = {
   email: string
   password: string
 }
 
-interface LoginFormErrors {
+type LoginFormErrors = {
   email?: string
   password?: string
 }
@@ -29,7 +29,7 @@ const LoginForm = () => {
   })
   const [errors, setErrors] = useState<LoginFormErrors>({})
 
-  const validate = () => {
+  const validate = (): LoginFormErrors => {
     const nextErrors: LoginFormErrors = {}
 
     if (!values.email.trim()) {
@@ -115,32 +115,107 @@ const LoginForm = () => {
   )
 }
 
+type NotificationBadgeProps = {
+  count: number
+  maxCount?: number
+}
 
+const NotificationBadge = ({ count, maxCount = 99 }: NotificationBadgeProps) => {
+  const displayCount = maxCount != null && count > maxCount ? `${maxCount}+` : String(count)
 
-export default function Module4Practice() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
+    <span
+      className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white"
+      role="status"
+      aria-label={`Notifications: ${displayCount}`}
+    >
+      {displayCount}
+    </span>
+  )
+}
+
+type ProgressBarProps = {
+  value: number
+  label?: string
+}
+
+const ProgressBar = ({ value, label }: ProgressBarProps) => {
+  const safeValue = Math.min(100, Math.max(0, Math.round(value)))
+
+  return (
+    <div>
+      {label && <span className="sr-only">{label}: {safeValue}%</span>}
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={safeValue}
+        aria-label={label ?? `Progress: ${safeValue}%`}
+        className="h-3 w-full overflow-hidden rounded bg-gray-200"
+      >
+        <div
+          className="h-full bg-blue-600"
+          style={{ width: `${safeValue}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+type ModalDialogProps = {
+  open: boolean
+  onClose: () => void
+  title: string
+  children: ReactNode
+}
+
+const ModalDialog = ({ open, onClose, title, children }: ModalDialogProps) => {
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-lg rounded-lg bg-white shadow-lg">
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Close
+          </button>
+        </div>
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
+  )
+}
+
+const Module4Practice = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="mx-auto max-w-4xl">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Module 4: Project Rules</h1>
+          <h1 className="mb-2 text-4xl font-bold">Module 4: Project Rules</h1>
           <p className="text-gray-600">
             Teach Copilot to follow your coding voice and style (Agent Mode)
           </p>
         </header>
 
         {/* LESSON 4.1 — Create Rules File */}
-        <section className="bg-white p-6 rounded-lg shadow mb-10">
-          <h2 className="text-2xl font-semibold mb-4">Lesson 4.1 — Setting Up Your Rules File</h2>
-          <p className="text-gray-700 mb-4">
+        <section className="mb-10 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-2xl font-semibold">Lesson 4.1 — Setting Up Your Rules File</h2>
+          <p className="mb-4 text-gray-700">
             Your project rules live in <code>.github/copilot-instructions.md</code>. Once created,
             Copilot automatically uses these instructions whenever you write or edit code in this
             repo.
           </p>
 
-          <div className="bg-gray-50 p-4 rounded border text-sm text-gray-800 mb-4">
-            <p className="font-semibold mb-2">Recommended rules:</p>
-            <pre className="bg-white p-4 rounded border text-sm text-gray-800 overflow-x-auto">
+          <div className="mb-4 rounded border bg-gray-50 p-4 text-sm text-gray-800">
+            <p className="mb-2 font-semibold">Recommended rules:</p>
+            <pre className="overflow-x-auto rounded border bg-white p-4 text-sm text-gray-800">
               {`# Copilot Instructions
 
 - Use React functional components with arrow functions.
@@ -160,56 +235,46 @@ export default function Module4Practice() {
         </section>
 
         {/* LESSON 4.2 — Test Rules with Agent Mode */}
-        <section className="bg-white p-6 rounded-lg shadow mb-10 border-l-4 border-blue-400">
-          <h2 className="text-2xl font-semibold mb-4">
+        <section className="mb-10 border-l-4 border-blue-400 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-2xl font-semibold">
             Lesson 4.2 — Testing Your Rules (Agent Mode)
           </h2>
-          <p className="text-gray-700 mb-4">
-            Use the practice area below to **direct Copilot (Agent Mode)** to scaffold real
+          <p className="mb-4 text-gray-700">
+            Use the practice area below to <strong>direct Copilot (Agent Mode)</strong> to scaffold real
             features. Each task should naturally follow your rules: arrow functions, TypeScript
             types, Tailwind classes, and minimal, purposeful comments.
           </p>
 
-          <div className="border-2 border-blue-400 rounded p-4 bg-blue-50">
-            <h3 className="font-semibold mb-2 text-gray-800">Practice Area — Agent Tasks</h3>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="rounded border-2 border-blue-400 bg-blue-50 p-4">
+            <h3 className="mb-2 font-semibold text-gray-800">Practice Area — Agent Tasks</h3>
+            <p className="mb-4 text-sm text-gray-600">
               Add a comment below and run the task with Copilot (Agent Mode):
             </p>
 
-            <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
+            <ul className="mb-4 space-y-1 text-sm text-gray-700">
               <li>
-                <code>
-                  // Scaffold a LoginForm with email, password, and submit button. Client-side
-                  validation, Tailwind styling, accessible labels.
-                </code>
+                • Client-side validation, Tailwind styling, accessible labels.
               </li>
               <li>
-                <code>
-                  // Build a ProfileCard with avatar image, name, bio, and a “Contact” button. Keep
-                  layout responsive and concise.
-                </code>
+                • Build a ProfileCard with avatar image, name, bio, and a "Contact" button. Keep
+                layout responsive and concise.
               </li>
               <li>
-                <code>
-                  // Create a PrimaryButton component (props: children, onClick, type?). Apply our
-                  standard Tailwind button style.
-                </code>
+                • Create a PrimaryButton component (props: children, onClick, type?). Apply standard Tailwind button style.
               </li>
               <li>
-                <code>
-                  // Implement a simple SearchBar with input, clear button, and debounced onChange
-                  callback (300ms).
-                </code>
+                • Implement a simple SearchBar with input, clear button, and debounced onChange
+                callback (300ms).
               </li>
             </ul>
 
-            <p className="text-sm text-gray-600 mb-2">Expected (based on your rules):</p>
-            <ul className="list-disc list-inside text-sm text-gray-700">
-              <li>Arrow-function components</li>
-              <li>TypeScript props/interfaces</li>
-              <li>Tailwind classes (no inline styles)</li>
-              <li>Small, focused structure + brief comments for non-obvious logic</li>
-              <li>Accessible markup for inputs and controls</li>
+            <p className="mb-2 text-sm text-gray-600">Expected (based on your rules):</p>
+            <ul className="mb-4 text-sm text-gray-700">
+              <li>• Arrow-function components</li>
+              <li>• TypeScript props/interfaces</li>
+              <li>• Tailwind classes (no inline styles)</li>
+              <li>• Small, focused structure + brief comments for non-obvious logic</li>
+              <li>• Accessible markup for inputs and controls</li>
             </ul>
 
             <LoginForm />
@@ -217,111 +282,22 @@ export default function Module4Practice() {
         </section>
 
         {/* LESSON 4.3 — Consistency Across Multiple Components */}
-        <section className="bg-white p-6 rounded-lg shadow mb-10 border-l-4 border-green-400">
-          <h2 className="text-2xl font-semibold mb-4">
+        <section className="mb-10 border-l-4 border-green-400 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-2xl font-semibold">
             Lesson 4.3 — Consistency Across Components
           </h2>
-          <p className="text-gray-700 mb-4">
+          <p className="mb-4 text-gray-700">
             Generate multiple components and verify that Copilot keeps your rules consistent across
             different feature shapes.
           </p>
 
-          <div className="border-2 border-green-400 rounded p-4 bg-green-50">
-            <p className="text-sm text-gray-700 mb-4">Agent tasks to try one-by-one:</p>
-            <ul className="list-disc list-inside text-sm text-gray-700 mb-4 space-y-1">
-              //Create a NotificationBadge component with a count and maxCount (e.g. "99+")
-              <li>
-                interface NotificationBadgeProps {
-                  count: number
-                  maxCount?: number
-                }
-
-                const NotificationBadge = ({ count, maxCount = 99 }: NotificationBadgeProps) => {
-                  const displayCount = maxCount != null && count > maxCount ? `${maxCount}+` : String(count)
-
-                  return (
-                    <span
-                      className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white"
-                      role="status"
-                      aria-label={`Notifications: ${displayCount}`}
-                    >
-                      {displayCount}
-                    </span>
-                  )
-                }
-              </li>
-              <li>
-                //Create a ProgressBar with value (0-100) and label prop
-                interface ProgressBarProps {
-                  value: number // 0 - 100
-                  label?: string
-                }
-
-                const ProgressBar = ({ value, label }: ProgressBarProps) => {
-                  const safeValue = Math.min(100, Math.max(0, Math.round(value)))
-
-                  return (
-                    <div>
-                      {label ? (
-                        <span className="sr-only">{label}: {safeValue}%</span>
-                      ) : null}
-
-                      <div
-                        role="progressbar"
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={safeValue}
-                        aria-label={label ?? `Progress: ${safeValue}%`}
-                        className="w-full rounded bg-gray-200 h-3 overflow-hidden"
-                      >
-                        <div
-                          className="h-full bg-blue-600"
-                          style={{ width: `${safeValue}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                }
-              </li>
-              <li>
-                // Create a ModalDialog (props: open, onClose, title). Include a close button and
-                focus trap note in comments.
-                interface ModalDialogProps {
-                  open: boolean
-                  onClose: () => void
-                  title: string
-                  children: ReactNode
-                }
-
-                // Basic modal shell. Add a focus trap for full accessibility when open.
-                const ModalDialog = ({ open, onClose, title, children }: ModalDialogProps) => {
-                  if (!open) return null
-
-                  return (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                      <div className="w-full max-w-lg rounded-lg bg-white shadow-lg">
-                        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-                          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                          <button
-                            type="button"
-                            onClick={onClose}
-                            className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            Close
-                          </button>
-                        </div>
-                        <div className="p-4">{children}</div>
-                      </div>
-                    </div>
-                  )
-                }
-              </li>
-              <li>
-                <code>
-                  // Create a DataTable shell (columns prop, rows prop). Responsive table layout
-                  with Tailwind utilities.
-                </code>
-              </li>
+          <div className="rounded border-2 border-green-400 bg-green-50 p-4">
+            <p className="mb-4 text-sm text-gray-700">Agent tasks to try one-by-one:</p>
+            <ul className="mb-4 space-y-2 text-sm text-gray-700">
+              <li>• Create a NotificationBadge component with a count and maxCount (e.g. "99+")</li>
+              <li>• Create a ProgressBar with value (0-100) and label prop</li>
+              <li>• Create a ModalDialog (props: open, onClose, title). Include a close button and focus trap note in comments.</li>
+              <li>• Create a DataTable shell (columns prop, rows prop). Responsive table layout with Tailwind utilities.</li>
             </ul>
 
             <p className="text-sm text-gray-700">
@@ -333,15 +309,15 @@ export default function Module4Practice() {
         </section>
 
         {/* LESSON 4.4 — Refining and Expanding Rules */}
-        <section className="bg-white p-6 rounded-lg shadow mb-10 border-l-4 border-purple-400">
-          <h2 className="text-2xl font-semibold mb-4">Lesson 4.4 — Refining and Expanding Rules</h2>
-          <p className="text-gray-700 mb-4">
+        <section className="mb-10 border-l-4 border-purple-400 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-2xl font-semibold">Lesson 4.4 — Refining and Expanding Rules</h2>
+          <p className="mb-4 text-gray-700">
             As your project grows, evolve your rules with specific, reusable patterns so Agent Mode
             drafts match your voice without reminders.
           </p>
 
-          <p className="text-gray-700 mb-4">Examples you can add to your rules file:</p>
-          <pre className="bg-gray-50 p-4 rounded border text-sm text-gray-800 overflow-x-auto mb-4">
+          <p className="mb-4 text-gray-700">Examples you can add to your rules file:</p>
+          <pre className="mb-4 overflow-x-auto rounded border bg-gray-50 p-4 text-sm text-gray-800">
             {`- Primary button style: 'px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-60'.
 - Form inputs: use label + id + aria-describedby; include error text with role="alert".
 - Components over ~25 lines: extract helpers; keep render paths simple and readable.
@@ -356,8 +332,8 @@ export default function Module4Practice() {
         </section>
 
         {/* SUMMARY */}
-        <section className="mt-10 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Key Takeaways</h2>
+        <section className="mt-10 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 p-6">
+          <h2 className="mb-4 text-2xl font-semibold text-gray-800">Key Takeaways</h2>
           <ul className="space-y-2 text-gray-700">
             <li>
               <strong>Define once, follow everywhere.</strong> Copilot reads your rules
@@ -380,3 +356,5 @@ export default function Module4Practice() {
     </div>
   )
 }
+
+export default Module4Practice
