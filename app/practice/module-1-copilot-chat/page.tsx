@@ -75,7 +75,7 @@ export default function Module1Practice() {
             </p>
             UNCOMMENT AND PRACTICE HERE:
             
-            <YourPracticeComponent />
+            {/* <YourPracticeComponent /> */}
           
            
           </section>
