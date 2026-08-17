@@ -269,7 +269,7 @@ interface ButtonProps {
 }
 
 // 2. Destructure and use it in your TSX component
-export const CustomButton = ({ 
+const CustomButton = ({ 
   text, 
   count = 0,             // Default value if not passed
   isDisabled = false,    // Default value if not passed
@@ -288,7 +288,7 @@ interface User {
   name: string;
 }
 
-export function UserProfile() {
+function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
